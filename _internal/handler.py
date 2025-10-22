@@ -40,7 +40,7 @@ class Application:
     ---
     Args:
         url_path (str):
-            The URL path to the webhook endpoint that you have specified on *your application's Developer Portal page -> 'Webhooks'*.
+            The URL path to the webhook endpoint you have specified on *your application's Developer Portal page -> 'Webhooks'*.
 
             For example, if your endpoint is *`https://quackbots.xyz/webhook1`*, then `url_path` should be *`/webhook1`* (it depends on your server/file configuration).
         verify_key (str):
