@@ -13,11 +13,11 @@ app = Application(...)
 ```
 `Application` takes two arguments:
 1. url_path (str):<br>
-The URL path to the webhook endpoint that you have specified on *your application's Developer Portal page -> 'Webhooks'*. For example, if your endpoint is *https://quackbots.xyz/webhook1*, then `url_path` should be */webhook1* (it depends on your server/file configuration).
+The URL path to the webhook endpoint you have specified on *your application's Developer Portal page -> 'Webhooks'*. For example, if your endpoint is *https://quackbots.xyz/webhook1*, then `url_path` should be */webhook1* (it depends on your server/file configuration).
 
 2. verify_key (str):<br>
 Your application's public key, used to verify Discord's request signature.<br>
-You can find this on your application's Developer Portal page -> 'General Information'.
+You can find this on *your application's Developer Portal page -> 'General Information'*.
 
 ### 2. Register an event listener
 ```python
