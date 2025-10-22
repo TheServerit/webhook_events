@@ -121,7 +121,7 @@ class Application:
             await handler(event, timestamp)
 
 
-def start_listening(host: str, port: int, applications: list[Application], basic_log: bool = True) -> None:
+def start_listening(*, host: str, port: int, applications: list[Application], basic_log: bool = True) -> None:
     """
     Starts listening for webhook events for the endpoints of the given application/s.
 
