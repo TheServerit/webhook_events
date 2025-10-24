@@ -2,6 +2,8 @@
 
 from ._internal.utils import iso_to_datetime as _iso_to_datetime
 from typing import Any as _Any
+from abc import ABC
+
 
 __all__ = [
     "ApplicationAuthorized",
@@ -16,9 +18,8 @@ __all__ = [
 ]
 
 
-class _AnyEvent:
-    def __init__(self, _: dict[str, _Any]) -> None:
-        pass # Overridden by subclasses
+class _AnyEvent(ABC):
+    def __init__(self, _: dict[str, _Any]) -> None: ...
 
 
 class _BaseLobbyMessage:
@@ -32,6 +33,7 @@ class _BaseLobbyMessage:
         self.metadata: dict[str, _Any] | None = data.get("metadata")
         self.flags: int = data["flags"]
         self.application_id = int(data["application_id"]) if data.get("application_id") else None
+
 
 class _BaseDirectMessage:
     def __init__(self, data: dict[str, _Any]) -> None:
@@ -94,6 +96,7 @@ class LobbyMessageCreate(_AnyEvent, _BaseLobbyMessage):
     `LOBBY_MESSAGE_CREATE` is sent when a message is created in a lobby.
     """
 
+
 class LobbyMessageUpdate(_AnyEvent, _BaseLobbyMessage):
     """
     Represents the updated lobby message object.
@@ -104,6 +107,7 @@ class LobbyMessageUpdate(_AnyEvent, _BaseLobbyMessage):
         super().__init__(data)
         self.edited_at = _iso_to_datetime(data["edited_timestamp"])
         self.created_at = _iso_to_datetime(data["timestamp"])
+
 
 class LobbyMessageDelete(_AnyEvent):
     """`LOBBY_MESSAGE_DELETE` is sent when a message is deleted from a lobby."""
@@ -118,12 +122,16 @@ class GameDirectMessageCreate(_AnyEvent, _BaseDirectMessage):
 
     `GAME_DIRECT_MESSAGE_CREATE` is sent when a direct message is created while at least one user has an active Social SDK session.
     """
+
+
 class GameDirectMessageUpdate(_AnyEvent, _BaseDirectMessage):
     """
     Represents the updated direct message object.
 
     `GAME_DIRECT_MESSAGE_UPDATE` is sent when a direct message is updated while at least one user has an active Social SDK session.
     """
+
+
 class GameDirectMessageDelete(_AnyEvent, _BaseDirectMessage):
     """
     Represents the deleted direct message object.
@@ -132,4 +140,5 @@ class GameDirectMessageDelete(_AnyEvent, _BaseDirectMessage):
     """
 
 
-del _Any, _iso_to_datetime, _BaseDirectMessage, _BaseLobbyMessage # Disallow usage to prevent confusion
+
+del _Any, _AnyEvent, _BaseDirectMessage, _BaseLobbyMessage, _iso_to_datetime # Disallow usage to prevent confusion
