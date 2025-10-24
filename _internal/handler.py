@@ -1,5 +1,5 @@
 from collections.abc import Callable, Coroutine
-from typing import TypeVar
+from typing import Any
 
 from fastapi import FastAPI, Request, Response
 from nacl.exceptions import BadSignatureError
@@ -20,16 +20,15 @@ logging.basicConfig(
 )
 
 
-AnyEvent = TypeVar("AnyEvent", bound=events._AnyEvent)
-"""An event object from the `events` module."""
+_AnyEvent = events._AnyEvent # pyright: ignore[reportPrivateUsage]
 
-HandlerFunc = Callable[[AnyEvent, datetime], Coroutine[None, None, None]]
+type HandlerFunc[AnyEvent: _AnyEvent] = Callable[[AnyEvent, datetime], Coroutine[None, None, None]]
 """
 A coroutine function (`async def`) with no returns (returns `None`) that takes
 two arguments in this order: an event object and a `datetime.datetime` object.
 """
 
-HandlerFuncDecorator = Callable[[HandlerFunc[AnyEvent]], HandlerFunc[AnyEvent]]
+type HandlerFuncDecorator[AnyEvent: _AnyEvent] = Callable[[HandlerFunc[AnyEvent]], HandlerFunc[AnyEvent]]
 """A decorator that takes `HandlerFunc` and returns `HandlerFunc`."""
 
  
@@ -40,7 +39,7 @@ class Application:
     ---
     Args:
         url_path (str):
-            The URL path to the webhook endpoint you have specified on *your application's Developer Portal page -> 'Webhooks'*.
+            The URL path to the webhook endpoint that you have specified on *your application's Developer Portal page -> 'Webhooks'*.
 
             For example, if your endpoint is *`https://quackbots.xyz/webhook1`*, then `url_path` should be *`/webhook1`* (it depends on your server/file configuration).
         verify_key (str):
@@ -50,8 +49,9 @@ class Application:
     def __init__(self, url_path: str, verify_key: str):
         self.url_path = url_path
         self.verify_key = verify_key
-        self._event_handlers: dict[str, HandlerFunc] = {}
-        self._EVENTS_MAP = {
+        
+        self._event_handlers: dict[str, HandlerFunc[Any]] = {}
+        self._EVENTS_MAP: dict[str, Any] = {
             "APPLICATION_AUTHORIZED": events.ApplicationAuthorized,
             "APPLICATION_DEAUTHORIZED": events.ApplicationDeauthorized,
             "ENTITLEMENT_CREATE": events.EntitlementCreate,
@@ -63,7 +63,7 @@ class Application:
             "GAME_DIRECT_MESSAGE_DELETE": events.GameDirectMessageDelete
         }
 
-    def on_event(self, event_type: type[AnyEvent], /) -> HandlerFuncDecorator[AnyEvent]:
+    def on_event[AnyEvent: _AnyEvent](self, event_type: type[AnyEvent], /) -> HandlerFuncDecorator[AnyEvent]:
         """
 
         A decorator for registering a function to call when an event of the specified type is received.
@@ -91,7 +91,7 @@ class Application:
             ...
         ```
         """
-        if not (isinstance(event_type, type) and issubclass(event_type, events._AnyEvent)):
+        if not (isinstance(event_type, type) and issubclass(event_type, _AnyEvent)): # pyright: ignore[reportUnnecessaryIsInstance]
             raise TypeError(f"Expected an event object (class variable), got '{type(event_type).__name__}'.")
         
         def decorator(func: HandlerFunc[AnyEvent]) -> HandlerFunc[AnyEvent]:
@@ -112,7 +112,7 @@ class Application:
 
         return decorator
 
-    async def _dispatch_event(self, event_type: str, event_data: dict, timestamp: datetime) -> None:
+    async def _dispatch_event(self, event_type: str, event_data: dict[str, Any], timestamp: datetime) -> None:
         """If an event handler is registered for the event type received, call the handler function with the needed arguments."""
         handler = self._event_handlers.get(event_type)
         if handler:
@@ -189,7 +189,7 @@ def start_listening(*, host: str, port: int, applications: list[Application], ba
             return Response(status_code=204, headers={"Content-Type": "application/json"})
         
         else:
-            event: dict = payload["event"]
+            event: dict[str, Any] = payload["event"]
             event_type: str = event["type"]
             data = event.get("data", {})
 
@@ -198,7 +198,7 @@ def start_listening(*, host: str, port: int, applications: list[Application], ba
                     logging.warning(f"[{application.url_path}] Ignoring an event without data: {event_type}")
             else:
                 timestamp = iso_to_datetime(event["timestamp"])
-                await application._dispatch_event(event_type=event_type, event_data=data, timestamp=timestamp)
+                await application._dispatch_event(event_type=event_type, event_data=data, timestamp=timestamp) # pyright: ignore[reportPrivateUsage]
 
                 if basic_log:
                     logging.info(f"[{application.url_path}] Received an event: {event_type}")
@@ -206,7 +206,7 @@ def start_listening(*, host: str, port: int, applications: list[Application], ba
         return Response(status_code=204)
         
     for application in applications:
-        async def listener(request: Request, app_instance=application):
+        async def listener(request: Request, app_instance: Application = application):
             return await handle_request(request, app_instance)
         app.add_api_route(application.url_path, listener, methods=["POST"])
         

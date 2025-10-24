@@ -1,6 +1,7 @@
 """This module contains all event objects."""
 
 from ._internal.utils import iso_to_datetime as _iso_to_datetime
+from typing import Any as _Any
 
 __all__ = [
     "ApplicationAuthorized",
@@ -14,22 +15,26 @@ __all__ = [
     "GameDirectMessageDelete"
 ]
 
-class _AnyEvent: ...
+
+class _AnyEvent:
+    def __init__(self, _: dict[str, _Any]) -> None:
+        pass # Overridden by subclasses
+
 
 class _BaseLobbyMessage:
-    def __init__(self, data: dict):
+    def __init__(self, data: dict[str, _Any]) -> None:
         self.id = int(data["id"])
         self.type: int = data["type"]
         self.content: str = data["content"]
         self.lobby_id = int(data["lobby_id"])
         self.channel_id = int(data["channel_id"])
-        self.author: dict = data["author"]
-        self.metadata: dict | None = data.get("metadata")
+        self.author: dict[str, _Any] = data["author"]
+        self.metadata: dict[str, _Any] | None = data.get("metadata")
         self.flags: int = data["flags"]
         self.application_id = int(data["application_id"]) if data.get("application_id") else None
 
 class _BaseDirectMessage:
-    def __init__(self, data: dict):
+    def __init__(self, data: dict[str, _Any]) -> None:
         self.message_data = data
         """Either a passthrough message or a regular message. Unparsed due to complexity."""
 
@@ -43,21 +48,23 @@ class _BaseDirectMessage:
         in-game and use a specialized structure.*
         """
         return "recipient_id" in self.message_data # A field unique to passthrough messages
-    
+
+
 class ApplicationAuthorized(_AnyEvent):
     """`APPLICATION_AUTHORIZED` is sent when the app is added to a server or user account."""
-    def __init__(self, data: dict):
+    def __init__(self, data: dict[str, _Any]) -> None:
         _integration_type = data.get("integration_type")
         self.is_guild_install = _integration_type == 0
         self.is_user_install = _integration_type == 1
-        self.user: dict = data["user"]
+        self.user: dict[str, _Any] = data["user"]
         self.scopes: list[str] = data["scopes"]
-        self.guild: dict | None = data.get("guild")
+        self.guild: dict[str, _Any] | None = data.get("guild")
 
 class ApplicationDeauthorized(_AnyEvent):
     """`APPLICATION_DEAUTHORIZED` is sent when the app is deauthorized by a user."""
-    def __init__(self, data: dict):
-        self.user: dict = data["user"]
+    def __init__(self, data: dict[str, _Any]) -> None:
+        self.user: dict[str, _Any] = data["user"]
+
 
 class EntitlementCreate(_AnyEvent):
     """
@@ -67,7 +74,7 @@ class EntitlementCreate(_AnyEvent):
     is created when a user purchases or is otherwise granted one of your app's SKUs.
     Refer to the [Monetization documentation](https://discord.com/developers/docs/monetization/overview) for details.
     """
-    def __init__(self, data: dict):
+    def __init__(self, data: dict[str, _Any]) -> None:
         self.id = int(data["id"])
         self.sku_id = int(data["sku_id"])
         self.application_id = int(data["application_id"])
@@ -78,6 +85,7 @@ class EntitlementCreate(_AnyEvent):
         self.ends_at = _iso_to_datetime(data["ends_at"]) if data.get("ends_at") else None
         self.guild_id = int(data["guild_id"]) if data.get("guild_id") else None
         self.consumed: bool | None = data.get("consumed")
+
 
 class LobbyMessageCreate(_AnyEvent, _BaseLobbyMessage):
     """
@@ -92,16 +100,17 @@ class LobbyMessageUpdate(_AnyEvent, _BaseLobbyMessage):
 
     `LOBBY_MESSAGE_UPDATE` is sent when a message is updated in a lobby.
     """
-    def __init__(self, data: dict):
+    def __init__(self, data: dict[str, _Any]) -> None:
         super().__init__(data)
         self.edited_at = _iso_to_datetime(data["edited_timestamp"])
         self.created_at = _iso_to_datetime(data["timestamp"])
 
 class LobbyMessageDelete(_AnyEvent):
     """`LOBBY_MESSAGE_DELETE` is sent when a message is deleted from a lobby."""
-    def __init__(self, data: dict):
+    def __init__(self, data: dict[str, _Any]) -> None:
         self.message_id = int(data["id"])
         self.lobby_id = int(data["lobby_id"])
+
 
 class GameDirectMessageCreate(_AnyEvent, _BaseDirectMessage):
     """
@@ -123,4 +132,4 @@ class GameDirectMessageDelete(_AnyEvent, _BaseDirectMessage):
     """
 
 
-del _iso_to_datetime, _BaseDirectMessage, _BaseLobbyMessage # Disallow usage to prevent confusion
+del _Any, _iso_to_datetime, _BaseDirectMessage, _BaseLobbyMessage # Disallow usage to prevent confusion
