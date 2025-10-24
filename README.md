@@ -5,6 +5,11 @@
 *All unparsed `dict` attributes are the standard Discord API objects of their name, unless said otherwise.*
 
 ## Step-by-step walkthrough
+First of all, install `fastapi` and `uvicorn` - used for running the server.
+```shell
+pip install fastapi uvicorn
+```
+
 ### 1. Create your application object
 ```python
 from webhook_events import Application
@@ -13,7 +18,7 @@ app = Application(...)
 ```
 `Application` takes two arguments:
 1. url_path (str):<br>
-The URL path to the webhook endpoint you have specified on *your application's Developer Portal page -> 'Webhooks'*. For example, if your endpoint is *https://quackbots.xyz/webhook1*, then `url_path` should be */webhook1* (it depends on your server/file configuration).
+The URL path to the webhook endpoint that you've specified on *your application's Developer Portal page -> 'Webhooks'*.<br>For example, if your endpoint is *https://quackbots.xyz/webhook1*, then `url_path` should be */webhook1* (it depends on your server/file configuration).
 
 2. verify_key (str):<br>
 Your application's public key, used to verify Discord's request signature.<br>
@@ -75,7 +80,7 @@ async def foo(event: events.ApplicationAuthorized, time: datetime):
 
 
 @app2.on_event(events.ApplicationDeauthorized)
-async def foo(event: events.ApplicationDeauthorized, time: datetime):
+async def bar(event: events.ApplicationDeauthorized, time: datetime):
   username = event.user["username"]
   print(f"{username} deauthorized app2 at {time}.")
 
