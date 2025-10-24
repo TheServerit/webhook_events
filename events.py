@@ -19,7 +19,7 @@ __all__ = [
 
 
 class _AnyEvent(ABC):
-    def __init__(self, _: dict[str, _Any]) -> None: ...
+    def __init__(self, data: dict[str, _Any]) -> None: ...
 
 
 class _BaseLobbyMessage:
@@ -141,4 +141,4 @@ class GameDirectMessageDelete(_AnyEvent, _BaseDirectMessage):
 
 
 
-del _Any, _AnyEvent, _BaseDirectMessage, _BaseLobbyMessage, _iso_to_datetime # Disallow usage to prevent confusion
+del _Any, _BaseDirectMessage, _BaseLobbyMessage, _iso_to_datetime # Disallow usage to prevent confusion
