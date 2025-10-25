@@ -2,7 +2,7 @@
 
 from ._internal.utils import iso_to_datetime as _iso_to_datetime
 from typing import Any as _Any
-from abc import ABC
+from abc import ABC as _ABC
 
 
 __all__ = [
@@ -18,7 +18,7 @@ __all__ = [
 ]
 
 
-class _AnyEvent(ABC):
+class _AnyEvent(_ABC):
     def __init__(self, data: dict[str, _Any]) -> None: ...
 
 
@@ -141,4 +141,4 @@ class GameDirectMessageDelete(_AnyEvent, _BaseDirectMessage):
 
 
 
-del _Any, _BaseDirectMessage, _BaseLobbyMessage, _iso_to_datetime # Disallow usage to prevent confusion
+del _Any, _ABC, _BaseDirectMessage, _BaseLobbyMessage, _iso_to_datetime # Disallow usage to prevent confusion
