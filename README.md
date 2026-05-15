@@ -1,13 +1,11 @@
 # A Python wrapper for Discord's [Webhook Events](https://discord.com/developers/docs/events/webhook-events#webhook-events).
 
-**In the code, each variable, class or function that is meant to be used has a docstring of its documentation.**
-
-*All unparsed `dict` attributes are the standard Discord API objects of their name, unless said otherwise.*
+**Notice: this project is designed for the latest version of Python. Compability with older versions is not guaranteed.**
 
 ## Step-by-step walkthrough
-First of all, install `fastapi` and `uvicorn` - used for running the server.
+First, install the dependencies:
 ```shell
-pip install fastapi uvicorn
+pip install starlette uvicorn pynacl
 ```
 
 ### 1. Create your application object
@@ -75,15 +73,28 @@ app2 = Application(url_path="/webhook2", verify_key="apple")
 
 @app1.on_event(events.ApplicationAuthorized)
 async def foo(event: events.ApplicationAuthorized, time: datetime):
-  username = event.user["username"]
+  username = event.user.username
   print(f"{username} authorized app1 at {time}!")
 
 
 @app2.on_event(events.ApplicationDeauthorized)
 async def bar(event: events.ApplicationDeauthorized, time: datetime):
-  username = event.user["username"]
+  username = event.user.username
   print(f"{username} deauthorized app2 at {time}.")
 
 
 start_listening(host="0.0.0.0", port=8080, applications=[app1, app2])
 ```
+
+### Accessing objects and types
+You can use the `types` module to directly access all objects, including nested objects, enums, etc.
+Example:
+```py
+from webhook_events.types import User, DisplayNameEffect
+
+def check_user(user: User) -> bool:
+    if user.display_name_styles.effect == DisplayNameEffect.NEON:
+        return True
+    return False
+```
+Note: the `types` module is not sorted by categories, therefore users are expected to find what they need by name.

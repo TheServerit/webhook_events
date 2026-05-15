@@ -1,17 +1,23 @@
+from typing import Any, TypedDict, NotRequired, Literal
 from collections.abc import Callable, Coroutine
-from typing import Any
 
-from fastapi import FastAPI, Request, Response
+from starlette.applications import Starlette
+from starlette.requests import Request
+from starlette.responses import Response
+
 from nacl.exceptions import BadSignatureError
 from nacl.signing import VerifyKey
-
-from .utils import iso_to_datetime
-from .. import events
 
 from datetime import datetime
 import logging
 import inspect
 import json
+
+import uvicorn
+
+from .utils import iso_to_datetime
+from . import events
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,18 +26,56 @@ logging.basicConfig(
 )
 
 
-_AnyEvent = events._AnyEvent # pyright: ignore[reportPrivateUsage]
+EventName = Literal[
+    "APPLICATION_AUTHORIZED",
+    "APPLICATION_DEAUTHORIZED",
+    "ENTITLEMENT_CREATE",
+    "ENTITLEMENT_UPDATE",
+    "ENTITLEMENT_DELETE",
+    "LOBBY_MESSAGE_CREATE",
+    "LOBBY_MESSAGE_UPDATE",
+    "LOBBY_MESSAGE_DELETE",
+    "GAME_DIRECT_MESSAGE_CREATE",
+    "GAME_DIRECT_MESSAGE_UPDATE",
+    "GAME_DIRECT_MESSAGE_DELETE"
+]
 
-type HandlerFunc[AnyEvent: _AnyEvent] = Callable[[AnyEvent, datetime], Coroutine[None, None, None]]
-"""
-A coroutine function (`async def`) with no returns (returns `None`) that takes
-two arguments in this order: an event object and a `datetime.datetime` object.
-"""
 
-type HandlerFuncDecorator[AnyEvent: _AnyEvent] = Callable[[HandlerFunc[AnyEvent]], HandlerFunc[AnyEvent]]
-"""A decorator that takes `HandlerFunc` and returns `HandlerFunc`."""
+class InnerEventPayload(TypedDict):
+    type: EventName
+    timestamp: str
+    data: NotRequired[events.EventData]
 
- 
+
+class OuterEventPayload(TypedDict):
+    version: int
+    application_id: str
+    type: int
+    event: NotRequired[InnerEventPayload]
+
+
+type HandlerFunc[EventT: events.Event] = Callable[[EventT, datetime], Coroutine[Any, Any, Any]]
+# A coroutine function (async def) that takes two arguments in this order: an event object and a datetime.datetime object.
+
+type HandlerFuncDecorator[EventT: events.Event] = Callable[[HandlerFunc[EventT]], HandlerFunc[EventT]]
+# A decorator that takes HandlerFunc and returns HandlerFunc."""
+
+
+EVENTS_MAP: dict[EventName, type[events.Event]] = {
+    "APPLICATION_AUTHORIZED": events.ApplicationAuthorized,
+    "APPLICATION_DEAUTHORIZED": events.ApplicationDeauthorized,
+    "ENTITLEMENT_CREATE": events.EntitlementCreate,
+    "ENTITLEMENT_UPDATE": events.EntitlementUpdate,
+    "ENTITLEMENT_DELETE": events.EntitlementDelete,
+    "LOBBY_MESSAGE_CREATE": events.LobbyMessageCreate,
+    "LOBBY_MESSAGE_UPDATE": events.LobbyMessageUpdate,
+    "LOBBY_MESSAGE_DELETE": events.LobbyMessageDelete,
+    "GAME_DIRECT_MESSAGE_CREATE": events.GameDirectMessageCreate,
+    "GAME_DIRECT_MESSAGE_UPDATE": events.GameDirectMessageUpdate,
+    "GAME_DIRECT_MESSAGE_DELETE": events.GameDirectMessageDelete
+}
+
+
 class Application:
     """
     An application object to handle webhook events for. Used in `start_listening`.
@@ -46,30 +90,21 @@ class Application:
             Your application's public key, used to verify Discord's request signature.
             You can find this on *your application's Developer Portal page -> 'General Information'*.
     """
+
+    __slots__ = ("url_path", "verify_key", "_event_handlers")
+
     def __init__(self, url_path: str, verify_key: str):
         self.url_path = url_path
         self.verify_key = verify_key
-        
         self._event_handlers: dict[str, HandlerFunc[Any]] = {}
-        self._EVENTS_MAP: dict[str, Any] = {
-            "APPLICATION_AUTHORIZED": events.ApplicationAuthorized,
-            "APPLICATION_DEAUTHORIZED": events.ApplicationDeauthorized,
-            "ENTITLEMENT_CREATE": events.EntitlementCreate,
-            "LOBBY_MESSAGE_CREATE": events.LobbyMessageCreate,
-            "LOBBY_MESSAGE_UPDATE": events.LobbyMessageUpdate,
-            "LOBBY_MESSAGE_DELETE": events.LobbyMessageDelete,
-            "GAME_DIRECT_MESSAGE_CREATE": events.GameDirectMessageCreate,
-            "GAME_DIRECT_MESSAGE_UPDATE": events.GameDirectMessageUpdate,
-            "GAME_DIRECT_MESSAGE_DELETE": events.GameDirectMessageDelete
-        }
 
-    def on_event[AnyEvent: _AnyEvent](self, event_type: type[AnyEvent], /) -> HandlerFuncDecorator[AnyEvent]:
+    def on_event[EventT: events.Event](self, event: type[EventT], /) -> HandlerFuncDecorator[EventT]:
         """
 
         A decorator for registering a function to call when an event of the specified type is received.
 
         This decorator takes a single positional argument:
-        an event object (class variable) of your choice (e.g. `events.ApplicationAuthorized`).
+        an event *class type* of your choice (e.g. `events.ApplicationAuthorized`).
 
         ---
 
@@ -91,10 +126,10 @@ class Application:
             ...
         ```
         """
-        if not (isinstance(event_type, type) and issubclass(event_type, _AnyEvent)): # pyright: ignore[reportUnnecessaryIsInstance]
-            raise TypeError(f"Expected an event object (class variable), got '{type(event_type).__name__}'.")
+        if not issubclass(event, events.Event): # pyright: ignore[reportUnnecessaryIsInstance]
+            raise TypeError(f"Expected an event class type (e.g. 'events.ApplicationAuthorized'), got '{type(event).__name__}'.")
         
-        def decorator(func: HandlerFunc[AnyEvent]) -> HandlerFunc[AnyEvent]:
+        def decorator(func: HandlerFunc[EventT]) -> HandlerFunc[EventT]:
             if not inspect.iscoroutinefunction(func):
                 raise TypeError(f"Expected a coroutine function (async def), got '{type(func).__name__}'.")
             
@@ -106,26 +141,29 @@ class Application:
             if func in self._event_handlers.values():
                 raise RuntimeError(f"Function '{func.__name__}' is already registered. Decorator-stacking is not supported.")
 
-            reversed_map = {v: k for k, v in self._EVENTS_MAP.items()} # Reverse from {event_type: event_obj} to {event_obj: event_type}
-            self._event_handlers[reversed_map[event_type]] = func
+            reversed_map = {v: k for k, v in EVENTS_MAP.items()} # Reverse from {event_type: event_obj} to {event_obj: event_type}
+            self._event_handlers[reversed_map[event]] = func
             return func
 
         return decorator
 
-    async def _dispatch_event(self, event_type: str, event_data: dict[str, Any], timestamp: datetime) -> None:
+    async def _dispatch_event(self, *, name: EventName, data: events.EventData, timestamp: datetime) -> None:
         """If an event handler is registered for the event type received, call the handler function with the needed arguments."""
-        handler = self._event_handlers.get(event_type)
+        handler = self._event_handlers.get(name)
         if handler:
-            event_cls = self._EVENTS_MAP[event_type]
-            event = event_cls(event_data)
+            event_cls = EVENTS_MAP[name]
+            event = event_cls(data)
             await handler(event, timestamp)
+
+    def __repr__(self) -> str:
+        return f"<Application url_path={self.url_path!r}>"
 
 
 def start_listening(*, host: str, port: int, applications: list[Application], basic_log: bool = True) -> None:
     """
     Starts listening for webhook events for the endpoints of the given application/s.
 
-    *Note: `WARNING`, `ERROR` and `CRITICAL` logs are enabled for `uvicorn` (the library who runs the server).*
+    *Note: `WARNING`, `ERROR` and `CRITICAL` logs are always enabled for uvicorn (library that runs the server).*
 
     ---
     Args:
@@ -154,9 +192,9 @@ def start_listening(*, host: str, port: int, applications: list[Application], ba
     ```
     """
 
-    app = FastAPI()
+    app = Starlette()
 
-    async def handle_request(request: Request, application: Application) -> Response | None:
+    async def handle_request(request: Request, application: Application) -> Response:
 
         verify_key = VerifyKey(bytes.fromhex(application.verify_key))
 
@@ -180,7 +218,7 @@ def start_listening(*, host: str, port: int, applications: list[Application], ba
 
             return Response(status_code=401, content="invalid request signature")
         
-        payload = json.loads(body_str)
+        payload: OuterEventPayload = json.loads(body_str)
 
         if payload["type"] == 0:
             if basic_log:
@@ -189,28 +227,33 @@ def start_listening(*, host: str, port: int, applications: list[Application], ba
             return Response(status_code=204, headers={"Content-Type": "application/json"})
         
         else:
-            event: dict[str, Any] = payload["event"]
-            event_type: str = event["type"]
-            data = event.get("data", {})
+            event = payload.get("event")
 
-            if not data:
-                if basic_log:
-                    logging.warning(f"[{application.url_path}] Ignoring an event without data: {event_type}")
+            if event:
+                name = event["type"]
+                data = event.get("data")
+
+                if not data:
+                    if basic_log:
+                        logging.warning(f"[{application.url_path}] Ignoring an event without data: {name}")
+                else:
+                    timestamp = iso_to_datetime(event["timestamp"])
+                    await application._dispatch_event(name=name, data=data, timestamp=timestamp) # pyright: ignore[reportPrivateUsage]
+
+                    if basic_log:
+                        logging.info(f"[{application.url_path}] Received an event: {name}")
             else:
-                timestamp = iso_to_datetime(event["timestamp"])
-                await application._dispatch_event(event_type=event_type, event_data=data, timestamp=timestamp) # pyright: ignore[reportPrivateUsage]
-
-                if basic_log:
-                    logging.info(f"[{application.url_path}] Received an event: {event_type}")
+                logging.warning(f"[{application.url_path}] Ignoring a payload without an event.")
 
         return Response(status_code=204)
         
     for application in applications:
-        async def listener(request: Request, app_instance: Application = application):
-            return await handle_request(request, app_instance)
-        app.add_api_route(application.url_path, listener, methods=["POST"])
         
-    logging.info(f"Started. (Press CTRL+C to quit)")
+        async def listener(request: Request) -> Response:
+            return await handle_request(request, application)
+        
+        app.add_route(application.url_path, listener, methods=["POST"])
+        
+    logging.info(f"Starting to listen for webhook events on {host}:{port}.")
 
-    import uvicorn
     uvicorn.run(app=app, host=host, port=port, log_level="warning")
