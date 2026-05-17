@@ -480,36 +480,17 @@ class Resolved:
     )
 
     def __init__(self, data: ResolvedData) -> None:
-        users_map: dict[int, User] = {}
-        for str_id, user in data.get("users", {}).items():
-            users_map[int(str_id)] = User(user)
-        self.users_map = users_map
+        self.users_map = {int(str_id): User(user) for str_id, user in data.get("users", {}).items()}
 
-        members_map: dict[int, PartialMember] = {}
-        for str_id, member in data.get("members", {}).items():
-            int_id = int(str_id)
-            members_map[int_id] = PartialMember(member, int_id)
-        self.members_map = members_map
+        self.members_map = {int(str_id): PartialMember(member, int(str_id)) for str_id, member in data.get("members", {}).items()}
 
-        roles_map: dict[int, Role] = {}
-        for str_id, role in data.get("roles", {}).items():
-            roles_map[int(str_id)] = Role(role)
-        self.roles_map = roles_map
+        self.roles_map = {int(str_id): Role(role) for str_id, role in data.get("roles", {}).items()}
 
-        channels_map: dict[int, PartialChannel] = {}
-        for str_id, channel in data.get("channels", {}).items():
-            channels_map[int(str_id)] = PartialChannel(channel)
-        self.channels_map = channels_map
+        self.channels_map = {int(str_id): PartialChannel(channel) for str_id, channel in data.get("channels", {}).items()}
 
-        messages_map: dict[int, PartialMessage] = {}
-        for str_id, message in data.get("messages", {}).items():
-            messages_map[int(str_id)] = PartialMessage(message)
-        self.messages_map = messages_map
+        self.messages_map = {int(str_id): PartialMessage(message) for str_id, message in data.get("messages", {}).items()}
 
-        attachments_map: dict[int, Attachment] = {}
-        for str_id, attachment in data.get("attachments", {}).items():
-            attachments_map[int(str_id)] = Attachment(attachment)
-        self.attachments_map = attachments_map
+        self.attachments_map = {int(str_id): Attachment(attachment) for str_id, attachment in data.get("attachments", {}).items()}
 
 
 class PollMedia:
