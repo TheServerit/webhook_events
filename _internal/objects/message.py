@@ -1,24 +1,20 @@
-from typing import TypedDict, NotRequired, TYPE_CHECKING
+from typing import TypedDict, NotRequired
 
 from .enums import try_enum, ChannelType, MessageType, MessageActivityType, MessageReferenceType, InteractionType, PollLayoutType, BaseThemeType
 from .user import User, UserData, WebhookUser, WebhookUserData, Collectibles, CollectiblesData, AvatarDecoration, AvatarDecorationData
 from .components import resolve_message_component, MessageComponentType, MessageComponentData, UnknownComponent, ComponentsWrapper
 from .application import Application, ApplicationData, PartialApplication, PartialApplicationData
 from .channel import Channel, ChannelData, PartialChannel, PartialChannelData
-from .sticker import Sticker, PartialSticker, PartialStickerData
+from .sticker import Sticker, StickerData, PartialSticker, PartialStickerData
 from .flags import MessageFlags, AttachmentFlags, MemberFlags
 from .emoji import PartialEmoji, PartialEmojiData
 from .embed import Embed, EmbedData
+from .role import Role, RoleData
 from .abc import Snowflake
 from .color import Color
-from .role import Role
 from .cdn import Asset
 
 from ..utils import iso_to_datetime
-
-if TYPE_CHECKING:
-    from .sticker import StickerData
-    from .role import RoleData
 
 
 __all__ = (
