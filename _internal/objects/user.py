@@ -1,8 +1,8 @@
 from typing import TypedDict, NotRequired
 
 from .enums import try_enum, DisplayNameFont, DisplayNameEffect
-from .flags import PublicUserFlags
 from .abc import MentionableSnowflake
+from .flags import PublicUserFlags
 from .color import Color
 from .cdn import Asset
 

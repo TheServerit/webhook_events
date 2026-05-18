@@ -1,8 +1,8 @@
 from typing import Any, TypedDict, NotRequired
 
 from .objects.message import Message, MessageData, MessageActivity, MessageActivityData
-from .objects.application import PartialApplication, PartialApplicationData
 from .objects.enums import try_enum, MessageType, EntitlementType, IntegrationType
+from .objects.application import PartialApplication, PartialApplicationData
 from .objects.channel import Channel, ChannelData
 from .objects.guild import Guild, GuildData
 from .objects.user import User, UserData

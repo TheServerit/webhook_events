@@ -4,16 +4,16 @@ if TYPE_CHECKING:
     from enum import IntEnum
 
 from .enums import (
-    UserFlagsTypes,
-    MessageFlagsTypes,
-    RoleFlagsTypes,
+    UnfurledMediaItemFlagsTypes,
     SystemChannelFlagsTypes,
     AttachmentFlagsTypes,
     EmbedMediaFlagsTypes,
-    EmbedFlagsTypes,
-    UnfurledMediaItemFlagsTypes,
+    MessageFlagsTypes,
+    ChannelFlagsTypes,
     MemberFlagsTypes,
-    ChannelFlagsTypes
+    EmbedFlagsTypes,
+    UserFlagsTypes,
+    RoleFlagsTypes
 )
 
 
