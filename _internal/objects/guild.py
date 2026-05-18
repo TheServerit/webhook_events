@@ -78,7 +78,7 @@ class IncidentsData:
         self.raid_detected_at = iso_to_datetime(raid_detected_at) if (raid_detected_at := data.get("raid_detected_at")) else None
 
 
-GuildFeatures = Literal[
+type GuildFeatures = Literal[
     "ANIMATED_BANNER",
     "ANIMATED_ICON",
     "APPLICATION_COMMAND_PERMISSIONS_V2",

@@ -26,7 +26,7 @@ logging.basicConfig(
 )
 
 
-EventName = Literal[
+type EventName = Literal[
     "APPLICATION_AUTHORIZED",
     "APPLICATION_DEAUTHORIZED",
     "ENTITLEMENT_CREATE",

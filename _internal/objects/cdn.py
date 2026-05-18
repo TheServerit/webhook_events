@@ -4,7 +4,7 @@ from typing import Literal
 __all__ = ("Asset",)
 
 
-CDNPath = Literal[
+type CDNPath = Literal[
     "icons",
     "avatars",
     "banners",
