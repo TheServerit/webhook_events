@@ -118,6 +118,7 @@ class SelectOptionData(TypedDict):
 
 
 class BaseSelectData(TypedDict):
+    id: NotRequired[int]
     custom_id: str
     placeholder: NotRequired[str]
     min_values: NotRequired[int]
@@ -128,7 +129,6 @@ class BaseSelectData(TypedDict):
 
 class StringSelectData(BaseSelectData):
     type: Literal[3]
-    id: NotRequired[int]
     options: list[SelectOptionData]
 
 
@@ -143,21 +143,18 @@ class DefaultValueSelectData(BaseSelectData):
 
 class UserSelectData(DefaultValueSelectData):
     type: Literal[5]
-    id: NotRequired[int]
 
 
 class RoleSelectData(DefaultValueSelectData):
     type: Literal[6]
-    id: NotRequired[int]
+
 
 class MentionableSelectData(DefaultValueSelectData):
     type: Literal[7]
-    id: NotRequired[int]
 
 
 class ChannelSelectData(DefaultValueSelectData):
     type: Literal[8]
-    id: NotRequired[int]
     channel_types: NotRequired[list[int]]
 
 
