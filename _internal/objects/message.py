@@ -37,7 +37,7 @@ __all__ = (
     "Poll",
     "MessageCall",
     "SharedClientTheme",
-    "Message",
+    "Message"
 )
 
 
