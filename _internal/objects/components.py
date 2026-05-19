@@ -235,6 +235,7 @@ class BaseComponent:
         self.id = data.get("id")
 
     def is_v2(self) -> bool:
+        """Whether this component is part of Components V2."""
         return self.type.value in (1, 9, 10, 11, 12, 13, 14, 17)
 
     def __repr__(self) -> str:
@@ -510,6 +511,8 @@ class MediaGalleryItem:
 
 
 class MediaGallery(BaseComponent):
+    __slots__ = ("items",)
+
     def __init__(self, data: MediaGalleryData):
         super().__init__(data)
         self.items = [MediaGalleryItem(item) for item in data["items"]]
@@ -527,7 +530,7 @@ class FileComponent(BaseComponent):
 
 
 class Separator(BaseComponent):
-    __slots__ = ()
+    __slots__ = ("is_visible", "spacing")
 
     def __init__(self, data: SeparatorData) -> None:
         super().__init__(data)
@@ -560,6 +563,7 @@ class ComponentsWrapper:
                 yield from child.walk_children() # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
 
     def is_components_v2(self) -> bool:
+        """Whether this wrapper contains components that are part of Components V2."""
         return any(child.is_v2() for child in self.walk_children())
     
     @classmethod

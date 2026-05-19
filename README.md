@@ -1,11 +1,15 @@
 # A Python wrapper for Discord's [Webhook Events](https://discord.com/developers/docs/events/webhook-events#webhook-events).
 
-**Notice: this project is designed for the latest version of Python. Compability with older versions is not guaranteed.**
+**Notice: this project is designed for the latest version of Python. Compatibility with older versions is not guaranteed.**
 
 ## Step-by-step walkthrough
 First, install the dependencies:
 ```shell
 pip install starlette uvicorn pynacl
+```
+Or use:
+```shell
+pip install -r requirements.txt
 ```
 
 ### 1. Create your application object

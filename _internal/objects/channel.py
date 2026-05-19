@@ -1,6 +1,7 @@
 from typing import TypedDict, NotRequired
 
 from .enums import try_enum, ChannelType, PermissionOverwriteType, ChannelVideoQualityMode, ChannelSortOrderType, ForumLayoutType
+from .abc import MentionableSnowflake
 from .user import User, UserData
 from .flags import ChannelFlags
 from .cdn import Asset
@@ -126,7 +127,7 @@ class PermissionOverwrite:
         self.deny = int(data["deny"])
 
 
-class PartialChannel:
+class PartialChannel(MentionableSnowflake):
     __slots__ = (
         "id",
         "name",

@@ -10,6 +10,7 @@ __all__ = (
     "SystemChannelFlagsTypes",
     "AttachmentFlagsTypes",
     "EmbedMediaFlagsTypes",
+    "MemberFlagsTypes",
 
     "VerificationLevel",
     "NSFWLevel",
@@ -32,7 +33,6 @@ __all__ = (
     "SeparatorSpacing",
     "InteractionType",
     "BaseThemeType",
-    "MemberFlagsTypes",
     "PermissionOverwriteType",
     "ChannelVideoQualityMode",
     "ChannelSortOrderType",
