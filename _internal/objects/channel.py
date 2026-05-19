@@ -16,7 +16,7 @@ __all__ = (
     "PermissionOverwrite",
     "ThreadMember",
     "ForumTag",
-    "DefaultReaction",
+    "DefaultReaction"
 )
 
 
