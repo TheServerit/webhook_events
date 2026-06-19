@@ -29,12 +29,14 @@ class PartialStickerData(TypedDict):
 
 
 class PartialSticker:
-    __slots__ = ("id", "name", "format")
+    __slots__ = ("id", "name", "format", "url")
     
     def __init__(self, data: PartialStickerData) -> None:
         self.id = int(data["id"])
         self.name = data["name"]
         self.format = try_enum(StickerFormatType, data["format_type"])
+
+        self.url = f"https://media.discordapp.net/stickers/{self.id}.png"
 
 
 class Sticker(Snowflake):
@@ -49,7 +51,8 @@ class Sticker(Snowflake):
         "is_available",
         "guild_id",
         "user",
-        "sort_value"
+        "sort_value",
+        "url"
     )
     
     def __init__(self, data: StickerData) -> None:
@@ -64,6 +67,8 @@ class Sticker(Snowflake):
         self.guild_id = int(guild_id) if (guild_id := data.get("guild_id")) else None
         self.user = User(user) if (user := data.get("user")) else None
         self.sort_value = data.get("sort_value")
+
+        self.url = f"https://media.discordapp.net/stickers/{self.id}.png"
 
     def __repr__(self) -> str:
         return f"<Sticker id={self.id} name={self.name!r}>"
