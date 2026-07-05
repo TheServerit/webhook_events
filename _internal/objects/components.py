@@ -427,16 +427,22 @@ class StringSelect(BaseSelect):
 
 
 class UserSelect(DefaultValueSelect):
+    __slots__ = ()
+
     if TYPE_CHECKING:
         def __init__(self, data: UserSelectData) -> None: ...
 
 
 class RoleSelect(DefaultValueSelect):
+    __slots__ = ()
+
     if TYPE_CHECKING:
         def __init__(self, data: RoleSelectData) -> None: ...
 
 
 class MentionableSelect(DefaultValueSelect):
+    __slots__ = ()
+    
     if TYPE_CHECKING:
         def __init__(self, data: MentionableSelectData) -> None: ...
 
