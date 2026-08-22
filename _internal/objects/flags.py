@@ -130,7 +130,7 @@ class PublicUserFlags(BaseFlags):
         return self._has_flag(UserFlagsTypes.SPAMMER)
 
     def all(self) -> list[UserFlagsTypes]:
-        """Returns a list of all flags that the user has."""
+        """Returns a list of all flags the user has."""
         return [flag for flag in UserFlagsTypes if self._has_flag(flag)]
 
 
@@ -210,7 +210,7 @@ class MessageFlags(BaseFlags):
         return self._has_flag(MessageFlagsTypes.IS_COMPONENTS_V2)
 
     def all(self) -> list[MessageFlagsTypes]:
-        """Returns a list of all flags that the message has."""
+        """Returns a list of all flags the message has."""
         return [flag for flag in MessageFlagsTypes if self._has_flag(flag)]
 
 
@@ -229,7 +229,7 @@ class RoleFlags(BaseFlags):
         return self._has_flag(RoleFlagsTypes.IN_PROMPT)
     
     def all(self) -> list[RoleFlagsTypes]:
-        """Returns a list of all flags that the role has."""
+        """Returns a list of all flags the role has."""
         return [flag for flag in RoleFlagsTypes if self._has_flag(flag)]
 
 
@@ -271,7 +271,7 @@ class SystemChannelFlags(BaseFlags):
         return self._has_flag(SystemChannelFlagsTypes.SUPPRESS_ROLE_SUBSCRIPTION_PURCHASE_NOTIFICATION_REPLIES)
     
     def all(self) -> list[SystemChannelFlagsTypes]:
-        """Returns a list of all flags that the system channel has."""
+        """Returns a list of all flags system channel has."""
         return [flag for flag in SystemChannelFlagsTypes if self._has_flag(flag)]
 
 
@@ -309,7 +309,7 @@ class AttachmentFlags(BaseFlags):
         return self._has_flag(AttachmentFlagsTypes.IS_ANIMATED)
     
     def all(self) -> list[AttachmentFlagsTypes]:
-        """Returns a list of all flags that the attachment has."""
+        """Returns a list of all flags the attachment has."""
         return [flag for flag in AttachmentFlagsTypes if self._has_flag(flag)]
 
 
@@ -328,7 +328,7 @@ class EmbedMediaFlags(BaseFlags):
         return self._has_flag(EmbedMediaFlagsTypes.IS_ANIMATED)
 
     def all(self) -> list[EmbedMediaFlagsTypes]:
-        """Returns a list of all flags that the embed has."""
+        """Returns a list of all flags the embed has."""
         return [flag for flag in EmbedMediaFlagsTypes if self._has_flag(flag)]
 
 
@@ -348,7 +348,7 @@ class EmbedFlags(BaseFlags):
         return self._has_flag(EmbedFlagsTypes.IS_CONTENT_INVENTORY_ENTRY)
 
     def all(self) -> list[EmbedFlagsTypes]:
-        """Returns a list of all flags that the embed has."""
+        """Returns a list of all flags the embed has."""
         return [flag for flag in EmbedFlagsTypes if self._has_flag(flag)]
 
 
@@ -367,7 +367,7 @@ class UnfurledMediaItemFlags(BaseFlags):
         return self._has_flag(UnfurledMediaItemFlagsTypes.IS_ANIMATED)
 
     def all(self) -> list[UnfurledMediaItemFlagsTypes]:
-        """Returns a list of all flags that the unfurled URL has."""
+        """Returns a list of all flags the unfurled URL has."""
         return [flag for flag in UnfurledMediaItemFlagsTypes if self._has_flag(flag)]
 
 
@@ -429,7 +429,7 @@ class MemberFlags(BaseFlags):
         return self._has_flag(MemberFlagsTypes.AUTOMOD_QUARANTINED_GUILD_TAG)
 
     def all(self) -> list[MemberFlagsTypes]:
-        """Returns a list of all flags that the member has."""
+        """Returns a list of all flags member has."""
         return [flag for flag in MemberFlagsTypes if self._has_flag(flag)]
 
 
@@ -467,5 +467,5 @@ class ChannelFlags(BaseFlags):
         return self._has_flag(ChannelFlagsTypes.IS_SPOILER_CHANNEL)
 
     def all(self) -> list[ChannelFlagsTypes]:
-        """Returns a list of all flags that the channel has."""
+        """Returns a list of all flags the channel has."""
         return [flag for flag in ChannelFlagsTypes if self._has_flag(flag)]
