@@ -1,8 +1,8 @@
 from typing import TypedDict, NotRequired
 
 from .enums import try_enum, ChannelType, MessageType, MessageActivityType, MessageReferenceType, InteractionType, PollLayoutType, BaseThemeType
+from .components import resolve_message_component, is_supported_component, MessageComponentType, MessageComponentData, ComponentsWrapper
 from .user import User, UserData, WebhookUser, WebhookUserData, Collectibles, CollectiblesData, AvatarDecoration, AvatarDecorationData
-from .components import resolve_message_component, MessageComponentType, MessageComponentData, UnknownComponent, ComponentsWrapper
 from .application import Application, ApplicationData, PartialApplication, PartialApplicationData
 from .channel import Channel, ChannelData, PartialChannel, PartialChannelData
 from .sticker import Sticker, StickerData, PartialSticker, PartialStickerData
@@ -379,7 +379,10 @@ class PartialMessage:
         self.mentioned_roles = [int(role_id) for role_id in data["mention_roles"]]
         self.stickers = [Sticker(sticker) for sticker in data["stickers"]]
         self.sticker_items = [PartialSticker(partial_sticker) for partial_sticker in data["sticker_items"]]
-        self.components: list[MessageComponentType | UnknownComponent] = [resolve_message_component(component) for component in data.get("components", [])]
+
+        self.components: list[MessageComponentType] = [
+            resolve_message_component(component) for component in data.get("components", []) if is_supported_component(component)
+        ]
 
     def build_components_wrapper(self) -> ComponentsWrapper:
         """Resolves the message's components into a `types.ComponentsWrapper` for accessibility."""
@@ -646,7 +649,11 @@ class Message(Snowflake):
         self.referenced_message = Message(message) if (message := data.get("referenced_message")) else None
         self.interaction_metadata = InteractionMetadata(metadata) if (metadata := data.get("interaction_metadata")) else None
         self.thread = Channel(thread) if (thread := data.get("thread")) else None
-        self.components: list[MessageComponentType | UnknownComponent] = [resolve_message_component(component) for component in data.get("components", [])]
+
+        self.components: list[MessageComponentType] = [
+            resolve_message_component(component) for component in data.get("components", []) if is_supported_component(component)
+        ]
+
         self.sticker_items = [PartialSticker(partial_sticker) for partial_sticker in data.get("sticker_items", [])]
         self.stickers = [Sticker(sticker) for sticker in data.get("stickers", [])]
         self.position = data.get("position")

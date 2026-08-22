@@ -256,7 +256,7 @@ class UnknownComponent:
         return f"<UnknownComponent type={self.type!r} id={self.id!r}>"
 
 
-def resolve_message_component(data: MessageComponentData) -> MessageComponentType | UnknownComponent:
+def resolve_message_component(data: MessageComponentData) -> MessageComponentType:
     match data["type"]:
         case 1:
             return ActionRow(data)
@@ -573,7 +573,7 @@ class ComponentsWrapper:
         return any(child.is_v2() for child in self.walk_children())
     
     @classmethod
-    def _from_message_components(cls, components: list[MessageComponentType | UnknownComponent]) -> ComponentsWrapper:
+    def _from_message_components(cls, components: list[MessageComponentType]) -> ComponentsWrapper:
         new = cls()
 
         new_components = [c for c in components if not isinstance(c, UnknownComponent)]
