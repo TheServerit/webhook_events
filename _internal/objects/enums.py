@@ -271,6 +271,10 @@ class DisplayNameFont(IntEnum):
     MEDIEVAL = 7
     EIGHT_BIT = 8
     VAMPYRE = 10
+    MONKEY_BARS = 13
+    MAINFRAME = 14
+    HEADBANG = 15
+    JOURNAL = 16
 
 
 class DisplayNameEffect(IntEnum):
@@ -279,6 +283,8 @@ class DisplayNameEffect(IntEnum):
     NEON = 3
     TOON = 4
     POP = 5
+    PRISM = 7
+    GUMMY = 8
 
 
 # Events:
@@ -321,6 +327,8 @@ class ChannelFlagsTypes(IntEnum):
     PINNED = 1
     REQUIRE_TAG = 4
     HIDE_MEDIA_DOWNLOAD_OPTIONS = 15
+    CHANNEL_OBFUSCATED = 17
+    IS_SPOILER_CHANNEL = 21
 
 
 class PermissionOverwriteType(IntEnum):

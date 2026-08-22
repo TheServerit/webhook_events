@@ -81,7 +81,7 @@ class ChannelData(PartialChannelData):
     recipients: list[UserData]
     icon: NotRequired[str | None]
     owner_id: NotRequired[str]
-    application_id: NotRequired[str]
+    application_id: NotRequired[str | None]
     managed: NotRequired[bool]
     rtc_region: NotRequired[str | None]
     video_quality_mode: NotRequired[int]

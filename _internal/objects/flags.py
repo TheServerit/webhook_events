@@ -458,6 +458,14 @@ class ChannelFlags(BaseFlags):
         """When set hides the embedded media download options. Available only for media channels."""
         return self._has_flag(ChannelFlagsTypes.HIDE_MEDIA_DOWNLOAD_OPTIONS)
 
+    @property
+    def obfuscated(self) -> bool:
+        return self._has_flag(ChannelFlagsTypes.CHANNEL_OBFUSCATED)
+
+    @property
+    def spoiler(self) -> bool:
+        return self._has_flag(ChannelFlagsTypes.IS_SPOILER_CHANNEL)
+
     def all(self) -> list[ChannelFlagsTypes]:
         """Returns a list of all flags that the channel has."""
         return [flag for flag in ChannelFlagsTypes if self._has_flag(flag)]
