@@ -460,10 +460,22 @@ class ChannelFlags(BaseFlags):
 
     @property
     def obfuscated(self) -> bool:
+        """
+        This channel's metadata has been obfuscated because the current user cannot view it.
+
+        Only ever set on channels received over the Gateway; the HTTP API never sets this flag.
+        """
         return self._has_flag(ChannelFlagsTypes.CHANNEL_OBFUSCATED)
 
     @property
     def spoiler(self) -> bool:
+        """
+        This channel is a Spoiler Channel i.e. users must opt in to view its contents.
+
+        Can be set on all guild text and voice channels (not `GUILD_STAGE`).
+
+        Can only be set for non-NSFW channels.
+        """
         return self._has_flag(ChannelFlagsTypes.IS_SPOILER_CHANNEL)
 
     def all(self) -> list[ChannelFlagsTypes]:
